@@ -2,6 +2,18 @@ From oadt Require Import prelude.
 From stdpp Require Export strings.
 From MetaCoq.Template Require Import Loader TemplateMonad BasicAst Ast.
 
+(** * Auxiliary functions *)
+
+(** Similar to List.skipn. *)
+Fixpoint string_drop (n : nat) (s : string) : string :=
+  match n with
+  | 0 => s
+  | S n => match s with
+           | EmptyString => ""
+           | String _ s => string_drop n s
+           end
+  end.
+
 (** * Utilities for MetaCoq *)
 
 #[global, universes(polymorphic)]
