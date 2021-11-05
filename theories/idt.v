@@ -206,3 +206,8 @@ Definition tsf_ind_gen_from {T : Type} (t : T) (name : ident)
            `{ctors : @CtorTermsOf _ cs}
   : TemplateMonad unit :=
   '(mind, i) <- tsf_get_mind ty; ind_gen name ctors mind i.
+
+(** This bidirectional hint is crucial if we want to use [app] to concatenate
+transformed constructor lists. Otherwise, Coq would be too dumb to propagate the
+type information to the constructor transformer tactics. *)
+Arguments app _ & _ _.
