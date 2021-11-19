@@ -125,15 +125,18 @@ Ltac specialize_any H := specialize (H (any ltac:(assumption))).
 
 (** Some type class magic for convenient user interface. *)
 
-Class QuoteTermOf {T : Type} (t : T) := _qtermof : term.
+Definition QuoteTermOf {T : Type} (t : T) := term.
+Existing Class QuoteTermOf.
 #[export]
 Hint Extern 1 (QuoteTermOf ?t) => quote_term t (fun t => exact t) : typeclass_instances.
 
-Class CtorTermsOf {T : Type} (cs : tsf_ctors_ty T) := _ctortermsof : list (ident * term).
+Definition CtorTermsOf {T : Type} (cs : tsf_ctors_ty T) := list (ident * term).
+Existing Class CtorTermsOf.
 #[export]
 Hint Extern 1 (CtorTermsOf ?cs) => tsf_ctors_to_tm cs : typeclass_instances.
 
-Class TypeOf {T : Type} (t : T) := _typeof : Type.
+Definition TypeOf {T : Type} (t : T) := Type.
+Existing Class TypeOf.
 #[export]
 Hint Extern 1 (@TypeOf ?T _) => exact T : typeclass_instances.
 
