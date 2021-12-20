@@ -53,7 +53,7 @@ Fixpoint try_remove_n_lambdas (n : nat) (t : term) {struct n} : term :=
 (** Mutual inductive definitions are not supported yet. *)
 
 (** The type returned by the constructor transformer tactics. *)
-Notation tsf_ctors_ty T := (list (ident * (False -> T -> Prop))).
+Notation tsf_ctors_ty T := (list (ident * (False -> T -> Type))).
 
 (** Used by constructor transformers to remove cases. *)
 Inductive tsf_skip_marker : Prop.
