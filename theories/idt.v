@@ -150,17 +150,17 @@ Definition ind_gen (name : ident) (ctors : list (ident * term))
   match nth_error mind.(ind_bodies) i with
   | Some ind =>
       let ind' :=
-        {| ind_finite := mind.(ind_finite) ;
-          ind_npars := mind.(ind_npars) ;
-          ind_universes := mind.(ind_universes) ;
-          ind_variance := mind.(ind_variance);
-          ind_params := mind.(ind_params);
-          ind_bodies := [ {| ind_name := name ;
-                            ind_type  := ind.(ind_type) ;
-                            ind_kelim := ind.(ind_kelim) ;
-                            ind_ctors := ctors;
-                            ind_projs := ind.(ind_projs);
-                            ind_relevance := ind.(ind_relevance) |} ]
+        {| ind_finite := mind.(ind_finite);
+           ind_npars := mind.(ind_npars);
+           ind_universes := mind.(ind_universes);
+           ind_variance := mind.(ind_variance);
+           ind_params := mind.(ind_params);
+           ind_bodies := [ {| ind_name := name;
+                              ind_type  := ind.(ind_type);
+                              ind_kelim := ind.(ind_kelim);
+                              ind_ctors := ctors;
+                              ind_projs := ind.(ind_projs);
+                              ind_relevance := ind.(ind_relevance) |} ]
         |}
       in tmMkInductive' ind'
   | _ => tmFail "No body found"
@@ -168,17 +168,17 @@ Definition ind_gen (name : ident) (ctors : list (ident * term))
 
 (** Default meta-information for inductive definition. *)
 Definition tsf_default_mind (ty : term) : mutual_inductive_body * nat :=
-  ({| ind_finite := Finite ;
-    ind_npars := 0 ;
-    ind_universes := Monomorphic_ctx (LevelSet.empty, ConstraintSet.empty);
-    ind_variance := None;
-    ind_params := [];
-    ind_bodies := [ {| ind_name := "" ;
-                      ind_type  := ty ;
-                      ind_kelim := IntoPropSProp ;
-                      ind_ctors := [];
-                      ind_projs := [];
-                      ind_relevance := Relevant |} ] |}, 0).
+  ({| ind_finite := Finite;
+      ind_npars := 0;
+      ind_universes := Monomorphic_ctx (LevelSet.empty, ConstraintSet.empty);
+      ind_variance := None;
+      ind_params := [];
+      ind_bodies := [ {| ind_name := "";
+                         ind_type  := ty;
+                         ind_kelim := IntoPropSProp;
+                         ind_ctors := [];
+                         ind_projs := [];
+                         ind_relevance := Relevant |} ] |}, 0).
 
 (** Generate an inductive definition of type [T] and constructors [cs]. [ty] is
 needed to get around some universe inconsistency issues. *)
