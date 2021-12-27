@@ -80,10 +80,8 @@ Tactic Notation "tsf_ctors" constr(ind) open_constr(tsf_ident) tactic3(tsf_ctor)
 
 Ltac tsf_ctor_id_ ind ctor R :=
   let T := type of ctor in
-  match eval pattern ind in T with
-  | ?P _ => let P := eval simpl in (P R) in
-              exact P
-  end.
+  let P := subst_pattern T ind R in
+  exact P.
 
 Ltac tsf_ctor_id ctor R :=
   let T := type of ctor in
