@@ -1,10 +1,9 @@
-From oadt Require Import prelude.
-From stdpp Require Export strings.
-From MetaCoq.Template Require Import Loader TemplateMonad BasicAst Ast.
+From Coq Require Import String.
+From MetaCoq.Template Require Import utils All.
 
-(** * Auxiliary functions *)
+(** * Auxiliaries *)
 
-(** Similar to List.skipn. *)
+(** Similar to List.skipn. Useful in name transformers. *)
 Fixpoint string_drop (n : nat) (s : string) : string :=
   match n with
   | 0 => s
@@ -14,27 +13,56 @@ Fixpoint string_drop (n : nat) (s : string) : string :=
            end
   end.
 
+(** Substitute [s] for subterm [t] in term [T]. *)
+Ltac subst_pattern T t s :=
+  match eval pattern t in T with
+  | ?f _ => let T' := eval hnf in (f s) in T'
+  end.
+
+(** Copied from [stdpp]. *)
+Ltac get_head e :=
+  lazymatch e with
+  | ?h _ => get_head h
+  | _ => e
+  end.
+
+(** A convoluted way to get the head of the conclusion of a type [T]. If [T] is
+[forall a, forall b, ..., h x y z], then [concl_head T] returns [h]. Maybe there is a
+better way. *)
+Ltac concl_head T :=
+  let H := fresh in
+  let _ := match goal with
+           | _ =>
+               eassert (_ -> False -> T) as H;
+               [ lazymatch goal with
+                 | |- ?T' -> _ -> _ =>
+                     let H := fresh in
+                     intros ? H; intros;
+                     lazymatch goal with
+                     | |- ?T => let h := get_head T in unify T' (h = h)
+                     end; elim H
+                 end
+               | ]
+           end in
+  lazymatch type of H with
+  | ?h = _ -> _ => h
+  end.
+
 (** * Utilities for MetaCoq *)
-
-#[global, universes(polymorphic)]
-Instance tm_mret : MRet TemplateMonad := @tmReturn.
-
-#[global, universes(polymorphic)]
-Instance tm_mbind : MBind TemplateMonad := fun _ _ f ma => tmBind ma f.
 
 (** Get the list of constructors of an inductive type. *)
 Definition get_ctors {T : Type} (t : T)
   : TemplateMonad (list (ident * typed_term)) :=
-  tm <- tmQuote t;
+  tm <- tmQuote t;;
   match tm with
   | tInd ind _ =>
-     mind <- tmQuoteInductive ind.(inductive_mind);
+     mind <- tmQuoteInductive ind.(inductive_mind);;
      match nth_error mind.(ind_bodies) ind.(inductive_ind) with
      | Some body =>
-       let names := map (fun '(name, _, _) => name) body.(ind_ctors) in
-       ts <- mapM (fun tm => t <- tmUnquote tm; mret t)
-                  (imap (fun i _ => tConstruct ind i []) body.(ind_ctors));
-       mret (zip names ts)
+         monad_map_i (fun i '(name, _, _) =>
+                        tm <- tmUnquote (tConstruct ind i []);;
+                        ret (name, tm))
+                     body.(ind_ctors)
      | _ => tmFail "No body found"
      end
   | _ => tmFail "Not an inductive type"
@@ -194,8 +222,8 @@ Definition tsf_get_mind (ty : term)
   : TemplateMonad (mutual_inductive_body * nat) :=
   match ty with
   | tInd ind _ =>
-     mind <- tmQuoteInductive ind.(inductive_mind);
-     mret (mind, ind.(inductive_ind))
+     mind <- tmQuoteInductive ind.(inductive_mind);;
+     ret (mind, ind.(inductive_ind))
   | _ => tmFail "Not an inductive type"
   end.
 
@@ -206,7 +234,7 @@ Definition tsf_ind_gen_from {T : Type} (t : T) (name : ident)
            `{ty : @QuoteTermOf _ t}
            `{ctors : @CtorTermsOf _ cs}
   : TemplateMonad unit :=
-  '(mind, i) <- tsf_get_mind ty; ind_gen name ctors mind i.
+  '(mind, i) <- tsf_get_mind ty;; ind_gen name ctors mind i.
 
 (** This bidirectional hint is crucial if we want to use [app] to concatenate
 transformed constructor lists. Otherwise, Coq would be too dumb to propagate the
