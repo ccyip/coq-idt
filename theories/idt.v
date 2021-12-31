@@ -16,7 +16,7 @@ Fixpoint string_drop (n : nat) (s : string) : string :=
 (** Substitute [s] for subterm [t] in term [T]. *)
 Ltac subst_pattern T t s :=
   match eval pattern t in T with
-  | ?f _ => let T' := eval hnf in (f s) in T'
+  | ?f _ => let T' := eval cbv beta in (f s) in T'
   end.
 
 (** Copied from [stdpp]. *)
