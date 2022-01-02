@@ -1,2 +1,43 @@
-# coq-idt
-Inductive definition transformers
+# Inductive Definition Transformers
+
+This Coq library allows you to transform an inductive definition to another
+inductive definition, by providing a *constructor transformer* tactic. It can be
+used to generate boilerplate lemmas for backward and forward reasoning, and to
+generate inductive types with many similar cases.
+
+## Get Started
+
+- [Abstract and talk at CoqPL 2022](https://popl22.sigplan.org/details/CoqPL-2022-papers/2/Scrap-your-boilerplate-definitions-in-10-lines-of-Ltac-)
+
+- [Tutorial](/theories/examples/tutorial.v)
+
+## Installation
+
+### Via Opam
+
+TODO
+
+### Dependencies
+
+- [coq](https://coq.inria.fr) (8.12-8.13)
+- [coq-metacoq-template](https://metacoq.github.io/) (>= 1.0~beta2+8.12)
+
+## Gallery
+
+A set of realistic applications can be found in the Coq formalization of
+[oblivious algebraic data types](https://github.com/ccyip/oadt/tree/idt).
+
+- Generate lemmas about multi-parallel-reduction for backward reasoning:
+  [theories/lang_oadt/mpared.v](https://github.com/ccyip/oadt/blob/idt/theories/lang_oadt/mpared.v)
+- Generate inversion lemmas about the typing and kinding relations for forward
+  reasoning:
+  [theories/lang_oadt/inversion.v](https://github.com/ccyip/oadt/blob/idt/theories/lang_oadt/inversion.v)
+- Generate the indistinguishability relation with mostly boring congruence
+  cases:
+  [theories/lang_oadt/indistinguishable.v](https://github.com/ccyip/oadt/blob/idt/theories/lang_oadt/indistinguishable.v)
+- Generate an equivalent small-step semantics with the evaluation context rule
+  (and the nonstandard "leaky" context rule) "expanded":
+  [theories/lang_oadt/step_alt.v](https://github.com/ccyip/oadt/blob/idt/theories/lang_oadt/step_alt.v)
+- Generate an equivalent intermediate semantics that admits a stronger induction
+  principle:
+  [theories/lang_oadt/reveal.v](https://github.com/ccyip/oadt/blob/idt/theories/lang_oadt/reveal.v)
