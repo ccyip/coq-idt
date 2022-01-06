@@ -24,7 +24,7 @@ TODO
 
 ## Gallery
 
-A set of realistic applications can be found in the Coq formalization of
+A set of more complicated applications can be found in the Coq formalization of
 [oblivious algebraic data types](https://github.com/ccyip/oadt/tree/idt).
 
 - Generate lemmas about multi-parallel-reduction for backward reasoning:
