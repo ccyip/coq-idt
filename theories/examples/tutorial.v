@@ -84,17 +84,16 @@ Qed.
     complex language. In addition, if we want to grow the language
     later, we will need to add more lemmas and fix the existing ones.
 
-    What we are going to do instead is to encode each of these
-    boilerplate lemmas as an inductive definition [mstep]: each case
-    of [mstep] corresponds to one of these lemmas. For example, one
-    constructor of [mstep], say [MST_App2], should has type: [forall
-    v1 t2 t2', t2 ==>* t2' -> mstep (tapp v1 t2) (tapp v1 t2')]. Once
-    we have proved [mstep] implies [multistep], whenever we need one
-    of these lemmas, we can simply apply this fact and the
-    corresponding constructor.
+    What we are going to do instead is to encode these boilerplate
+    lemmas as an inductive definition [mstep]: each case of [mstep]
+    corresponds to one of these lemmas. For example, one constructor
+    of [mstep], say [MST_App2], should has type: [forall v1 t2 t2', t2 ==>*
+    t2' -> mstep (tapp v1 t2) (tapp v1 t2')]. Once we have proved
+    [mstep] implies [multistep], whenever we need one of these lemmas,
+    we can simply apply this fact and the corresponding constructor.
 
-   Importantly using IDT, we can automatically generate this
-   definition via the command: *)
+    Importantly using IDT, we can automatically generate this
+    definition via the command: *)
 
 (**
 [[
@@ -104,35 +103,33 @@ MetaCoq Run (tsf_ind_gen_from step "mstep" mstep_ctors).
 
 (** [tsf_ind_gen_from], defined in the IDT library, generates a new
     inductive definition named [mstep] with the same type and other
-    "meta-information" from [step]. Its third argument to is a list of
+    "meta-information" from [step]. Its third argument to a list of
     the signatures of the constructors of [mstep]. IDT provides
     several tactics to automatically generate this argument from the
-    signatures of the constructors of [mstep] and the information
-    provided by [step]. To see how these tactics work, it's helpful to
-    first see how to interactively generate [mstep_ctors] in proof
-    mode.*)
+    constructors of [step]. To see how these tactics work, it's
+    helpful to first see how to interactively generate [mstep_ctors]
+    in proof mode.*)
 
 Definition mstep_ctors : tsf_ctors_ty (type_of step).
 Proof.
 
-  (** We use [tsf_ctors_ty] tactic to build the type of the
-  constructor list[mstep_ctors]; IDT provides several tactics for
-  generate such types.
+  (** We use [tsf_ctors_ty] notation to build the type of the
+  constructor list [mstep_ctors].
 
-  We begin by running the following tactic [tsf_ctors ]: *)
+  We begin by running the following tactic [tsf_ctors]: *)
 
   tsf_ctors step (append "M'") tsf_interact.
 
-(* [tsf_ctors] generates a subgoal one for each of the 6 constructor
-   of [step], solving each goal "explains" how to build the type of a
-   corresponding constructor. The second argument [tsf_ctors] is used
-   to generate the names for each of these constructors. The final
-   parameter is a tactic that is applied to each subgoal. This tactic
-   takes two arguments: the constructor from [step] being transformed,
-   and the relation being defined (i.e. [mstep]). In order to expose
-   these arguments in the resulting subgoals, we use the constructor
-   transformer tactic [tsf_interact], which does nothing but poses its
-   two arguments to the hypothesis context. *)
+  (** [tsf_ctors] generates a subgoal for each of the 6 constructor of
+  [step], solving each goal "explains" how to build the type of a
+  corresponding constructor. The second argument [tsf_ctors] is used
+  to generate the names for each of these constructors. The final
+  parameter is a tactic that is applied to each subgoal. This tactic
+  takes two arguments: the constructor from [step] being transformed,
+  and the relation being defined (i.e. [mstep]). In order to expose
+  these arguments in the resulting subgoals, we use the constructor
+  transformer tactic [tsf_interact], which does nothing but poses its
+  two arguments to the hypothesis context. *)
 
   (** Let's focus on the case of [ST_App2] as an example of how an
   individual constructor is built. *)
