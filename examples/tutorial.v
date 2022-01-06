@@ -103,7 +103,7 @@ MetaCoq Run (tsf_ind_gen_from step "mstep" mstep_ctors).
 
 (** [tsf_ind_gen_from], defined in the IDT library, generates a new
     inductive definition named [mstep] with the same type and other
-    "meta-information" from [step]. Its third argument to a list of
+    "meta-information" from [step]. Its third argument is a list of
     the signatures of the constructors of [mstep]. IDT provides
     several tactics to automatically generate this argument from the
     constructors of [step]. To see how these tactics work, it's
@@ -120,7 +120,7 @@ Proof.
 
   tsf_ctors step (append "M'") tsf_interact.
 
-  (** [tsf_ctors] generates a subgoal for each of the 6 constructor of
+  (** [tsf_ctors] generates a subgoal for each of the 6 constructors of
   [step], solving each goal "explains" how to build the type of a
   corresponding constructor. The second argument [tsf_ctors] is used
   to generate the names for each of these constructors. The final
