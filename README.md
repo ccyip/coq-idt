@@ -15,7 +15,11 @@ generate inductive types with many similar cases.
 
 ### Via Opam
 
-TODO
+``` sh
+opam repo add coq-released https://coq.inria.fr/opam/released
+opam install coq-idt
+
+```
 
 ### Dependencies
 
