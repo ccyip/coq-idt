@@ -2,8 +2,8 @@
 
 [![Build status][action-badge]][action-link]
 
-[action-badge]: https://github.com/ccyip/idt/actions/workflows/build.yml/badge.svg?branch=master
-[action-link]: https://github.com/ccyip/idt/actions
+[action-badge]: https://github.com/ccyip/coq-idt/actions/workflows/build.yml/badge.svg?branch=master
+[action-link]: https://github.com/ccyip/coq-idt/actions
 
 This Coq library allows you to transform an inductive definition to another
 inductive definition, by providing a *constructor transformer* tactic. It can be
