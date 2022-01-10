@@ -18,7 +18,6 @@ build: [
 install: [make "install"]
 
 depends: [
-  "ocaml"
   "coq" {>= "8.12" & < "8.14~"}
   "coq-metacoq-template" {>= "1.0~beta2+8.12"}
 ]
