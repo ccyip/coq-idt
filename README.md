@@ -9,7 +9,7 @@ generate inductive types with many similar cases.
 
 - [Abstract and talk at CoqPL 2022 (to appear)](https://popl22.sigplan.org/details/CoqPL-2022-papers/2/Scrap-your-boilerplate-definitions-in-10-lines-of-Ltac-)
 
-- [Tutorial](/theories/examples/tutorial.v)
+- [Tutorial](/examples/tutorial.v)
 
 ## Installation
 
