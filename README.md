@@ -1,5 +1,10 @@
 # Inductive Definition Transformers
 
+[![Build status][action-badge]][action-link]
+
+[action-badge]: https://github.com/ccyip/idt/actions/workflows/build.yml/badge.svg?branch=master
+[action-link]: https://github.com/ccyip/idt/actions
+
 This Coq library allows you to transform an inductive definition to another
 inductive definition, by providing a *constructor transformer* tactic. It can be
 used to generate boilerplate lemmas for backward and forward reasoning, and to
