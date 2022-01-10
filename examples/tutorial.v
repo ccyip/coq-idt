@@ -1,7 +1,5 @@
-From idt Require Import idt.
+From idt Require Import all.
 From Coq Require Import Relations.Relation_Operators.
-From Coq Require Import String.
-Open Scope string_scope.
 
 (** We will be using a formalization of the simply typed lambda
     calculus as an example. This formalization is adapted from
