@@ -18,8 +18,8 @@ build: [
 install: [make "install"]
 
 depends: [
-  "coq" {>= "8.12" & < "8.14~"}
-  "coq-metacoq-template" {>= "1.0~beta2+8.12"}
+  "coq" {>= "8.14" & < "8.17"}
+  "coq-metacoq-template" {>= "1.1"}
 ]
 
 synopsis: "Inductive Definition Transformers"

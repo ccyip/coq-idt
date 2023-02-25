@@ -12,11 +12,12 @@ jobs:
     strategy:
       matrix:
         image:
-          - 'coqorg/coq:8.13-ocaml-4.12-flambda'
-          - 'coqorg/coq:8.12-ocaml-4.11-flambda'
+          - 'coqorg/coq:8.16-ocaml-4.14-flambda'
+          - 'coqorg/coq:8.15-ocaml-4.14-flambda'
+          - 'coqorg/coq:8.14-ocaml-4.14-flambda'
       fail-fast: false
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: coq-community/docker-coq-action@v1
         with:
           opam_file: 'coq-idt.opam'

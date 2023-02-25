@@ -12,7 +12,7 @@ generate inductive types with many similar cases.
 
 ## Get Started
 
-- [Abstract and talk at CoqPL 2022 (to appear)](https://popl22.sigplan.org/details/CoqPL-2022-papers/2/Scrap-your-boilerplate-definitions-in-10-lines-of-Ltac-)
+- [Abstract and talk at CoqPL 2022](https://popl22.sigplan.org/details/CoqPL-2022-papers/2/Scrap-your-boilerplate-definitions-in-10-lines-of-Ltac-)
 
 - [Tutorial](/examples/tutorial.v)
 
@@ -28,8 +28,8 @@ opam install coq-idt
 
 ### Dependencies
 
-- [coq](https://coq.inria.fr) (8.12-8.13)
-- [coq-metacoq-template](https://metacoq.github.io/) (>= 1.0~beta2+8.12)
+- [coq](https://coq.inria.fr) (8.14-8.16)
+- [coq-metacoq-template](https://metacoq.github.io/) (>= 1.1)
 
 ## Gallery
 

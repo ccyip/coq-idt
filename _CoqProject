@@ -1,4 +1,5 @@
 -Q theories idt
 
 theories/idt.v
+theories/utils.v
 theories/all.v

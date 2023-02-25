@@ -1,17 +1,7 @@
-From Coq Require Import String.
 From MetaCoq.Template Require Import utils All.
+Import monad_utils.MCMonadNotation.
 
 (** * Auxiliaries *)
-
-(** Similar to List.skipn. Useful in name transformers. *)
-Fixpoint string_drop (n : nat) (s : string) : string :=
-  match n with
-  | 0 => s
-  | S n => match s with
-           | EmptyString => ""
-           | String _ s => string_drop n s
-           end
-  end.
 
 (** Substitute [s] for subterm [t] in term [T]. *)
 Ltac subst_pattern T t s :=
@@ -50,25 +40,26 @@ Ltac concl_head T :=
 
 (** * Utilities for MetaCoq *)
 
-(** Get the list of constructors of an inductive type. *)
-Definition get_ctors {T : Type} (t : T)
-  : TemplateMonad (list (ident * typed_term)) :=
-  tm <- tmQuote t;;
+(** Get the list of constructors of an inductive type. The constructor name is
+converted to Coq builtin [string] type, so the users are not exposed to MetaCoq
+internals. *)
+Definition get_ctors (tm : term)
+  : TemplateMonad (list (String.string * typed_term)) :=
   match tm with
   | tInd ind _ =>
      mind <- tmQuoteInductive ind.(inductive_mind);;
      match nth_error mind.(ind_bodies) ind.(inductive_ind) with
      | Some body =>
-         monad_map_i (fun i '(name, _, _) =>
+         monad_map_i (fun i cstr =>
                         tm <- tmUnquote (tConstruct ind i []);;
-                        ret (name, tm))
+                        ret (String.to_string (cstr_name cstr), tm))
                      body.(ind_ctors)
      | _ => tmFail "No body found"
      end
   | _ => tmFail "Not an inductive type"
   end.
 
-(* Copied from MetaCoq's repository. *)
+(* Copied from MetaCoq's [add_constructor] example. *)
 Fixpoint try_remove_n_lambdas (n : nat) (t : term) {struct n} : term :=
   match n, t with
   | 0, _ => t
@@ -76,12 +67,25 @@ Fixpoint try_remove_n_lambdas (n : nat) (t : term) {struct n} : term :=
   | S _, _ => t
   end.
 
+Definition remove_last_n {A} (l : list A) (n : nat) : list A :=
+  firstn (#|l| - n) l.
+
+Definition new_cstr mdecl (idc : ident) (ctor : term) : constructor_body :=
+  let '(args, concl) := decompose_prod_assum [] ctor in
+  let (hd, indices) := decompose_app concl in
+  {| cstr_name := idc;
+    cstr_args := remove_last_n args #|mdecl.(ind_params)|;
+    cstr_indices := skipn mdecl.(ind_npars) indices;
+    cstr_type := ctor;
+    cstr_arity := context_assumptions args |}.
+
+
 (** * Inductive Definition Transformers *)
 
 (** Mutual inductive definitions are not supported yet. *)
 
 (** The type returned by the constructor transformer tactics. *)
-Notation tsf_ctors_ty T := (list (ident * (False -> T -> Type))).
+Notation tsf_ctors_ty T := (list (String.string * (False -> T -> Type))).
 
 (** Used by constructor transformers to remove cases. *)
 Inductive tsf_skip_marker : Prop.
@@ -92,19 +96,20 @@ type being transformed, [tsf_ident] is the name transformer function, and
 [tsf_ctor] is the constructor transformer tactic. [tsf_ctor] takes as arguments
 the constructor being transformed and the relation being defined. *)
 Tactic Notation "tsf_ctors" constr(ind) open_constr(tsf_ident) tactic3(tsf_ctor) :=
-  run_template_program (get_ctors ind)
-                       (fun xs =>
-                          let xs := eval simpl in xs in
-                          let rec go xs :=
-                            lazymatch xs with
-                            | (?name, (existT_typed_term _ ?ctor)) :: ?xs =>
-                                let n := eval compute in (tsf_ident name) in
-                                refine ((n, _) :: _); [
-                                  intros Hc R; tsf_ctor ctor R
-                                | go xs ]
-                            | _ => exact []
-                            end
-                          in go xs).
+  let tm := constr:(<% ind %>) in
+  run_template_program (get_ctors tm)
+    (fun xs =>
+       let xs := eval simpl in xs in
+       let rec go xs :=
+         lazymatch xs with
+         | (?name, (existT_typed_term _ ?ctor)) :: ?xs =>
+             let n := eval compute in (tsf_ident name) in
+             refine ((n, _) :: _); [
+               intros Hc R; tsf_ctor ctor R
+             | go xs ]
+         | _ => exact []
+         end
+       in go xs).
 
 Ltac tsf_ctor_id_ ind ctor R :=
   let T := type of ctor in
@@ -156,7 +161,8 @@ Existing Class QuoteTermOf.
 #[export]
 Hint Extern 1 (QuoteTermOf ?t) => quote_term t (fun t => exact t) : typeclass_instances.
 
-Definition CtorTermsOf {T : Type} (cs : tsf_ctors_ty T) := list (ident * term).
+Definition CtorTermsOf {T : Type} (cs : tsf_ctors_ty T) :=
+  list (String.string * term).
 Existing Class CtorTermsOf.
 #[export]
 Hint Extern 1 (CtorTermsOf ?cs) => tsf_ctors_to_tm cs : typeclass_instances.
@@ -172,9 +178,13 @@ Notation type_of t := (_ : TypeOf t) (only parsing).
 definition, the list of its (quoted) constructors, and the "meta-information"
 required by MetaCoq. *)
 #[universes(polymorphic)]
-Definition ind_gen (name : ident) (ctors : list (ident * term))
+Definition ind_gen (name : String.string) (ctors : list (String.string * term))
            (mind : mutual_inductive_body) (i : nat) : TemplateMonad unit :=
-  let ctors := map (fun '(n, t) => (n, try_remove_n_lambdas 1 t, 0)) ctors in
+  let ctors := map (fun '(n, t) =>
+                      new_cstr
+                        mind (String.of_string n)
+                        (* We do not support mutual inductive type. *)
+                        (try_remove_n_lambdas 1 t)) ctors in
   match nth_error mind.(ind_bodies) i with
   | Some ind =>
       let ind' :=
@@ -183,7 +193,9 @@ Definition ind_gen (name : ident) (ctors : list (ident * term))
            ind_universes := mind.(ind_universes);
            ind_variance := mind.(ind_variance);
            ind_params := mind.(ind_params);
-           ind_bodies := [ {| ind_name := name;
+           ind_bodies := [ {| ind_name := String.of_string name;
+                              ind_indices := ind.(ind_indices);
+                              ind_sort  := ind.(ind_sort);
                               ind_type  := ind.(ind_type);
                               ind_kelim := ind.(ind_kelim);
                               ind_ctors := ctors;
@@ -198,19 +210,24 @@ Definition ind_gen (name : ident) (ctors : list (ident * term))
 Definition tsf_default_mind (ty : term) : mutual_inductive_body * nat :=
   ({| ind_finite := Finite;
       ind_npars := 0;
-      ind_universes := Monomorphic_ctx (LevelSet.empty, ConstraintSet.empty);
-      ind_variance := None;
       ind_params := [];
-      ind_bodies := [ {| ind_name := "";
-                         ind_type  := ty;
-                         ind_kelim := IntoPropSProp;
-                         ind_ctors := [];
-                         ind_projs := [];
-                         ind_relevance := Relevant |} ] |}, 0).
+      ind_universes := Monomorphic_ctx;
+      ind_variance := None;
+      ind_bodies := [ {|
+         ind_name := "";
+         (* Technically, [ind_indices] should be computed from [ty] (by
+         [decompose_prod_assum]), but it seems Coq will automatically fix it. *)
+         ind_indices := [];
+         ind_sort := Universe.of_levels (inl PropLevel.lProp);
+         ind_type := ty;
+         ind_kelim := IntoPropSProp;
+         ind_ctors := [];
+         ind_projs := [];
+         ind_relevance := Relevant |} ] |}, 0).
 
 (** Generate an inductive definition of type [T] and constructors [cs]. [ty] is
 needed to get around some universe inconsistency issues. *)
-Definition tsf_ind_gen (T : Type) (name : ident) (cs : tsf_ctors_ty T)
+Definition tsf_ind_gen (T : Type) (name : String.string) (cs : tsf_ctors_ty T)
            `{ty : @QuoteTermOf _ T}
            `{ctors : @CtorTermsOf _ cs}
   : TemplateMonad unit :=
@@ -229,7 +246,7 @@ Definition tsf_get_mind (ty : term)
 
 (** Generate an inductive definition that has the same meta-information as [t]
 with constructors [cs]. *)
-Definition tsf_ind_gen_from {T : Type} (t : T) (name : ident)
+Definition tsf_ind_gen_from {T : Type} (t : T) (name : String.string)
            (cs : tsf_ctors_ty T)
            `{ty : @QuoteTermOf _ t}
            `{ctors : @CtorTermsOf _ cs}
