@@ -1,5 +1,6 @@
-From MetaCoq.Template Require Import utils All.
-Import monad_utils.MCMonadNotation.
+From MetaCoq.Utils Require Import utils.
+From MetaCoq.Template Require Import All.
+Import MCMonadNotation.
 
 (** * Auxiliaries *)
 
