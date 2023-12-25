@@ -28,8 +28,7 @@ opam install coq-idt
 
 ### Dependencies
 
-- [coq](https://coq.inria.fr) (8.14-8.16)
-- [coq-metacoq-template](https://metacoq.github.io/) (>= 1.1)
+See [opam file](/coq-idt.opam).
 
 ## Gallery
 
