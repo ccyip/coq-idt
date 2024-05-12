@@ -17,27 +17,18 @@ Ltac get_head e :=
   | _ => e
   end.
 
-(** A convoluted way to get the head of the conclusion of a type [T]. If [T] is
-[forall a, forall b, ..., h x y z], then [concl_head T] returns [h]. Maybe there is a
-better way. *)
+(** Get the conclusion head of a type [T]. If [T] is [forall a, forall b, ..., h x y z],
+then [concl_head T] returns [h]. *)
 Ltac concl_head T :=
-  let H := fresh in
-  let _ := match goal with
-           | _ =>
-               eassert (_ -> False -> T) as H;
-               [ lazymatch goal with
-                 | |- ?T' -> _ -> _ =>
-                     let H := fresh in
-                     intros ? H; intros;
-                     lazymatch goal with
-                     | |- ?T => let h := get_head T in unify T' (h = h)
-                     end; elim H
-                 end
-               | ]
-           end in
-  lazymatch type of H with
-  | ?h = _ -> _ => h
-  end.
+  let rec go T :=
+    lazymatch T with
+    | forall X, @?T X =>
+        let T := open_constr:(T _) in
+        let T := eval hnf in T in
+        go T
+    | _ => get_head T
+    end
+  in go T.
 
 (** * Utilities for MetaCoq *)
 
