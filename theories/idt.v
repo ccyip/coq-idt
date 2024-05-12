@@ -219,7 +219,7 @@ Definition tsf_default_mind (ty : term) : mutual_inductive_body * nat :=
          (* Technically, [ind_indices] should be computed from [ty] (by
          [decompose_prod_assum]), but it seems Coq will automatically fix it. *)
          ind_indices := [];
-         ind_sort := Universe.of_levels (inl PropLevel.lProp);
+         ind_sort := Sort.of_levels (inl PropLevel.lProp);
          ind_type := ty;
          ind_kelim := IntoPropSProp;
          ind_ctors := [];
