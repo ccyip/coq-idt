@@ -20,7 +20,7 @@ jobs:
           - 'coqorg/coq:8.19-ocaml-4.14-flambda'
       fail-fast: false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: coq-community/docker-coq-action@v1
         with:
           opam_file: 'coq-idt.opam'
